@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://nr5vmjhh8gj2"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_q7tdo"]
+[ext_resource type="PackedScene" uid="uid://dntpalrnw5idk" path="res://tile.tscn" id="2_ikhjo"]
+[ext_resource type="PackedScene" uid="uid://dl5kuer716c4x" path="res://tile_board.tscn" id="3_0akb8"]
+[ext_resource type="PackedScene" uid="uid://dhjpe1sqhps8e" path="res://hud.tscn" id="4_rmkkt"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_q7tdo")
+tile_scene = ExtResource("2_ikhjo")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.360784, 0.184314, 0.352941, 1)
+
+[node name="TileBoard" parent="." instance=ExtResource("3_0akb8")]
+visible = false
+
+[node name="HUD" parent="." instance=ExtResource("4_rmkkt")]
+
+[connection signal="back_to_menu" from="HUD" to="." method="_on_hud_back_to_menu"]
+[connection signal="start_game" from="HUD" to="." method="_on_hud_start_game"]

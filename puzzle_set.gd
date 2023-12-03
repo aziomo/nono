@@ -1,0 +1,21 @@
+extends Node
+
+var puzzles := []
+
+
+func import_puzzles_from_file():
+	var file = FileAccess.open("puzzles.txt", FileAccess.READ)
+	var line = file.get_line()
+	
+	while !file.eof_reached():
+		var puzzle = Puzzle.new()
+		
+		if line.contains('name='):
+			puzzle._name = line.get_slice('name=', 1)
+		line = file.get_line()
+		if line.contains('board='):
+			line = file.get_line()
+			while !line.contains('end'):
+				puzzle._board.push_back(line.split())
+				line = file.get_line()
+			puzzles.push_back(puzzle)

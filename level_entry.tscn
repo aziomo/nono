@@ -1,0 +1,78 @@
+[gd_scene load_steps=7 format=3 uid="uid://ch7ub38sw456r"]
+
+[ext_resource type="Shader" path="res://hl.gdshader" id="1_oxrg4"]
+[ext_resource type="Texture2D" uid="uid://ddxi0ly0xt30t" path="res://assets/q-mark.png" id="1_um03g"]
+[ext_resource type="Theme" uid="uid://c8mfdhfoyqtvq" path="res://container_theme.tres" id="2_3ghb6"]
+[ext_resource type="Theme" uid="uid://chcdb3lcs1co4" path="res://themes/label_theme.tres" id="2_xebli"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xh6pq"]
+resource_local_to_scene = true
+shader = ExtResource("1_oxrg4")
+shader_parameter/brightness = 4.75e-08
+
+[sub_resource type="GDScript" id="GDScript_34fr5"]
+script/source = "extends PanelContainer
+
+		
+func set_label(puzzle):
+	$MarginContainer/HBoxContainer/VBoxContainer/PuzzleName.text = puzzle._name
+	$MarginContainer/HBoxContainer/VBoxContainer/PuzzleSize.text = \"%dx%d\" % [puzzle.get_board_height(), puzzle.get_board_width()]
+
+var highlighted:
+	set(value):
+		highlighted = value
+		material.set_shader_parameter(\"brightness\", 0.0 if highlighted else -0.5)
+
+func _ready():
+	material.set_shader_parameter(\"brightness\", 0.0 if highlighted else -0.5)
+	
+
+func _process(delta):
+	pass
+"
+
+[node name="LevelEntry" type="PanelContainer"]
+texture_filter = 1
+material = SubResource("ShaderMaterial_xh6pq")
+offset_right = 776.0
+offset_bottom = 94.0
+theme = ExtResource("2_3ghb6")
+script = SubResource("GDScript_34fr5")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+use_parent_material = true
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+use_parent_material = true
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+texture_filter = 1
+use_parent_material = true
+layout_mode = 2
+size_flags_horizontal = 2
+texture = ExtResource("1_um03g")
+expand_mode = 2
+stretch_mode = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+texture_filter = 1
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PuzzleName" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_xebli")
+theme_override_font_sizes/font_size = 32
+text = "puzzle name"
+
+[node name="PuzzleSize" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_xebli")
+theme_override_font_sizes/font_size = 32
+text = "?x?"

@@ -1,0 +1,9 @@
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://c8mfdhfoyqtvq"]
+
+[ext_resource type="Texture2D" uid="uid://dh8b6e3b8qt2f" path="res://assets/label-bg.png" id="1_vb50b"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_li7si"]
+texture = ExtResource("1_vb50b")
+
+[resource]
+PanelContainer/styles/panel = SubResource("StyleBoxTexture_li7si")

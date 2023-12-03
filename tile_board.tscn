@@ -1,0 +1,183 @@
+[gd_scene load_steps=4 format=3 uid="uid://dl5kuer716c4x"]
+
+[ext_resource type="PackedScene" uid="uid://dntpalrnw5idk" path="res://tile.tscn" id="2_bv5p7"]
+[ext_resource type="PackedScene" uid="uid://dey711hm370gk" path="res://TileBoardNumber/tile_board_number.tscn" id="3_f1dcp"]
+
+[sub_resource type="GDScript" id="GDScript_ruhoe"]
+script/source = "extends Node2D
+
+signal game_result
+
+@export var tile_scene: PackedScene
+@export var tile_label_scene: PackedScene
+var ex_tile
+var focused_tile
+var prev_tile_state
+var tile_drag_edit_mode
+
+@export var puzzle_array = [
+	[0, 0, 0, 1, 1, 1, 1],
+	[0, 0, 0, 0, 0, 0, 1],
+	[0, 0, 1, 1, 1, 1, 1],
+	[0, 1, 0, 0, 0, 0, 1],
+	[1, 1, 1, 1, 1, 1, 1]
+]
+
+var points_to_win = 0
+var points: int = 0
+	
+func _enter_tree():
+	ex_tile = tile_scene.instantiate()
+	
+func _ready():
+	pass
+	
+func initialize_tiles():
+	points = 0
+	var pos_x = 0
+	var pos_y = 0
+	var tile
+	
+	
+	var row_labels = []
+	for row in puzzle_array:
+		var counter = 0
+		var keep_counting = false
+		var single_row_labels = []
+		for row_item in row:
+			if (keep_counting && row_item == 0):
+				keep_counting = false
+				single_row_labels.push_back(counter)
+				counter = 0
+			elif (row_item == 1):
+				keep_counting = true
+				counter += 1
+		if counter > 0: single_row_labels.push_back(counter)
+		row_labels.push_back(single_row_labels)
+		
+	var col_labels = []
+	for col_idx in puzzle_array[0].size():
+		var counter = 0
+		var keep_counting = false
+		var single_col_labels = []
+		for row_idx in puzzle_array.size():
+			if (keep_counting && puzzle_array[row_idx][col_idx] == 0):
+				keep_counting = false
+				single_col_labels.push_back(counter)
+				counter = 0
+			elif (puzzle_array[row_idx][col_idx] == 1):
+				keep_counting = true
+				counter += 1
+		if counter > 0: single_col_labels.push_back(counter)
+		col_labels.push_back(single_col_labels)
+	
+	
+	var label
+	for row_values in row_labels:
+		for label_value in row_values:
+			label = tile_label_scene.instantiate()
+			pos_x -= label.width()
+			label.position = Vector2(pos_x, pos_y)
+			label.value = label_value
+			add_child(label)
+			label.add_to_group(\"tile_labels\")
+		pos_x = 0
+		pos_y += label.height()
+		
+		
+	pos_x = 0
+	pos_y = 0
+		
+	for col_values in col_labels:
+		for label_value in col_values:
+			label = tile_label_scene.instantiate()
+			pos_y -= label.height()
+			label.position = Vector2(pos_x, pos_y)
+			label.value = label_value
+			add_child(label)
+			label.add_to_group(\"tile_labels\")
+		pos_x += label.width()
+		pos_y = 0
+	
+	
+	pos_x = 0
+	pos_y = 0
+	
+	points_to_win = 0
+	for x in puzzle_array:
+		for y in x:
+			tile = tile_scene.instantiate()
+			tile.correct = bool(y)
+			points_to_win += y
+			tile.position = Vector2(pos_x, pos_y)
+			tile.connect('mark_changed', register_points)
+			add_child(tile)
+			tile.add_to_group(\"tiles\")
+			pos_x += tile.width()
+			
+		pos_y += tile.height()
+		pos_x = 0
+	
+func register_points(point):
+	points += point
+	if (points == points_to_win): game_result.emit(1)
+
+func _process(delta):
+	pass
+	
+func get_tile_at_position(position):
+	if !visible: return null
+	var col = int(position.x / ex_tile.width())
+	var row = int(position.y / ex_tile.height())
+	if position.x < 0 or position.y < 0 or col > puzzle_array[0].size() or row > puzzle_array.size():
+		return null
+	var tiles = get_tree().get_nodes_in_group(\"tiles\")
+	for tile in tiles:
+		if col * tile.width() == tile.position.x && row * tile.height() == tile.position.y:
+			return tile
+	
+func _input(event):
+	if event is InputEventMouseButton:
+		
+			
+		if event.pressed and focused_tile:
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				if focused_tile.state == Enums.TILE_STATE.FULL:
+					tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
+					focused_tile.state = Enums.TILE_STATE.CLEAR
+				else:
+					tile_drag_edit_mode = Enums.TILE_STATE.FULL
+					focused_tile.state = Enums.TILE_STATE.FULL
+					
+			if event.button_index == MOUSE_BUTTON_RIGHT:
+				if focused_tile.state == Enums.TILE_STATE.CROSSED:
+					tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
+					focused_tile.state = Enums.TILE_STATE.CLEAR
+				else:
+					tile_drag_edit_mode = Enums.TILE_STATE.CROSSED
+					focused_tile.state = Enums.TILE_STATE.CROSSED
+					
+		else:
+			tile_drag_edit_mode = null
+		
+		
+	if event is InputEventMouseMotion:
+		
+		if visible:
+		
+			if is_instance_valid(focused_tile) && focused_tile.highlighted:
+				focused_tile.highlighted = false
+			
+			focused_tile = get_tile_at_position(event.position - self.position)
+			if focused_tile:
+				focused_tile.highlighted = true
+
+				if tile_drag_edit_mode:
+					focused_tile.state = tile_drag_edit_mode
+	
+"
+
+[node name="TileBoard" type="Node2D"]
+script = SubResource("GDScript_ruhoe")
+tile_scene = ExtResource("2_bv5p7")
+tile_label_scene = ExtResource("3_f1dcp")

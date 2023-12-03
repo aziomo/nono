@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://dey711hm370gk"]
+
+[ext_resource type="Script" path="res://TileBoardNumber/TileBoardNumber.gd" id="1_lepov"]
+[ext_resource type="Shader" path="res://hl.gdshader" id="1_onmhc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kfgye"]
+shader = ExtResource("1_onmhc")
+shader_parameter/brightness = null
+
+[node name="TileBoardNumber" type="Sprite2D"]
+texture_filter = 1
+material = SubResource("ShaderMaterial_kfgye")
+scale = Vector2(2, 2)
+centered = false
+script = ExtResource("1_lepov")
