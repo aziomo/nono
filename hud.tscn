@@ -1,61 +1,39 @@
-[gd_scene load_steps=10 format=3 uid="uid://dhjpe1sqhps8e"]
+[gd_scene load_steps=8 format=3 uid="uid://dhjpe1sqhps8e"]
 
-[ext_resource type="Script" path="res://hud.gd" id="1_4m112"]
 [ext_resource type="Texture2D" uid="uid://dh8b6e3b8qt2f" path="res://assets/label-bg.png" id="1_f4ca4"]
 [ext_resource type="FontFile" uid="uid://c2m2ct5i2ewj4" path="res://assets/Pixellari.ttf" id="2_6eyyu"]
-[ext_resource type="Theme" uid="uid://c8mfdhfoyqtvq" path="res://container_theme.tres" id="2_sbfqd"]
-[ext_resource type="Script" path="res://MessageBox.gd" id="2_tbu01"]
+[ext_resource type="PackedScene" uid="uid://d24tcxr5sq2sd" path="res://message_box.tscn" id="3_kfql6"]
 [ext_resource type="Theme" uid="uid://cx1rlr5xncb2h" path="res://themes/button_theme.tres" id="5_14f0y"]
 [ext_resource type="PackedScene" uid="uid://c31xe6evynabn" path="res://SelectLevelMenu/select_level_menu.tscn" id="8_wjwhs"]
-[ext_resource type="PackedScene" uid="uid://ch7ub38sw456r" path="res://level_entry.tscn" id="8_xju82"]
+
+[sub_resource type="GDScript" id="GDScript_n2v5r"]
+script/source = "extends CanvasLayer
+signal start_game
+signal back_to_menu
+
+func _ready():
+	pass
+	
+func _process(delta):
+	pass
+
+func _on_start_button_pressed():
+	start_game.emit()
+
+func _on_quit_button_pressed():
+	get_tree().quit()
+
+func _on_back_to_menu_button_pressed():
+	back_to_menu.emit()
+"
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bwk5l"]
 texture = ExtResource("1_f4ca4")
 
 [node name="HUD" type="CanvasLayer"]
-script = ExtResource("1_4m112")
-level_entry_ps = ExtResource("8_xju82")
+script = SubResource("GDScript_n2v5r")
 
-[node name="MessageBox" type="PanelContainer" parent="."]
-visible = false
-texture_filter = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -128.0
-offset_top = -64.0
-offset_right = 128.0
-offset_bottom = 64.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("2_sbfqd")
-script = ExtResource("2_tbu01")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MessageBox"]
-layout_mode = 2
-
-[node name="MsgLabel" type="Label" parent="MessageBox/VBoxContainer"]
-texture_filter = 5
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 10
-size_flags_stretch_ratio = 0.86
-theme_override_fonts/font = ExtResource("2_6eyyu")
-theme_override_font_sizes/font_size = 16
-text = "You win!"
-horizontal_alignment = 1
-
-[node name="BackToMenuButton" type="Button" parent="MessageBox/VBoxContainer"]
-texture_filter = 1
-custom_minimum_size = Vector2(145, 34)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 6
-size_flags_stretch_ratio = 1.14
-theme = ExtResource("5_14f0y")
-text = "Back to menu"
+[node name="MessageBox" parent="." instance=ExtResource("3_kfql6")]
 
 [node name="MainMenu" type="Control" parent="."]
 layout_mode = 3
@@ -126,6 +104,5 @@ metadata/_edit_use_anchors_ = true
 
 [node name="SelectLevelMenu" parent="." instance=ExtResource("8_wjwhs")]
 
-[connection signal="pressed" from="MessageBox/VBoxContainer/BackToMenuButton" to="." method="_on_back_to_menu_button_pressed"]
 [connection signal="pressed" from="MainMenu/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="MainMenu/QuitButton" to="." method="_on_quit_button_pressed"]

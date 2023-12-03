@@ -1,13 +1,105 @@
-[gd_scene load_steps=5 format=3 uid="uid://nr5vmjhh8gj2"]
+[gd_scene load_steps=4 format=3 uid="uid://nr5vmjhh8gj2"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_q7tdo"]
-[ext_resource type="PackedScene" uid="uid://dntpalrnw5idk" path="res://tile.tscn" id="2_ikhjo"]
 [ext_resource type="PackedScene" uid="uid://dl5kuer716c4x" path="res://tile_board.tscn" id="3_0akb8"]
 [ext_resource type="PackedScene" uid="uid://dhjpe1sqhps8e" path="res://hud.tscn" id="4_rmkkt"]
 
+[sub_resource type="GDScript" id="GDScript_tq2ro"]
+script/source = "extends Node
+
+@export var tile_scene: PackedScene
+
+var focused_tile
+var focused_card
+var tile_drag_edit_mode = null
+var prev_tile_state := Enums.TILE_STATE.CLEAR
+var mouse_pressed = false
+var mbutton_pressed = null
+#var puzzles = []
+
+func _ready():
+	$TileBoard.connect('game_result', _on_tile_board_game_result)
+	PuzzleSet.import_puzzles_from_file()
+	
+var second_init = false
+	
+func _on_hud_start_game():
+	
+	var testing_game = false
+	if testing_game:
+		init_tileboard()
+		$HUD/MainMenu.hide()
+		$TileBoard.show()
+	else:
+		$HUD/MainMenu.hide()
+		$HUD/SelectLevelMenu.set_entries()
+		$HUD/SelectLevelMenu.show()
+	
+	
+func init_tileboard():
+	var puzzle_array = $TileBoard.puzzle_array
+	var tile = tile_scene.instantiate()
+	var pos_x = $Background.size.x / 2 - (puzzle_array[0].size() * tile.width() / 2)
+	var pos_y = $Background.size.y / 2 - (puzzle_array.size() * tile.height() / 2)
+	
+	tile.free()
+	$TileBoard.initialize_tiles()
+	$TileBoard.position = Vector2(pos_x, pos_y)
+		
+	
+func _process(delta):
+	pass
+	
+func _on_tile_board_game_result(result):
+	if result == 1:
+		$HUD/MessageBox.show()
+	
+func _on_hud_back_to_menu():
+	
+	var tiles = get_tree().get_nodes_in_group('tiles')
+	for t in tiles:	t.queue_free()
+	var tile_labels = get_tree().get_nodes_in_group('tile_labels')
+	for tl in tile_labels: tl.queue_free()
+	$TileBoard.hide()
+	$HUD/MessageBox.hide()
+	$HUD/MainMenu.show()
+	
+func register_points_change():
+	pass
+	
+func is_cursor_inbounds(event):
+	var tileboard_cursor_pos = event.position - $TileBoard.position
+	return tileboard_cursor_pos.x > 0 && tileboard_cursor_pos.y > 0
+	
+func _input(event):
+	
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ESCAPE:
+			get_tree().quit()
+		
+	if event is InputEventMouseButton:
+		pass
+		
+		
+	if event is InputEventMouseMotion:
+#
+					
+		if $HUD/SelectLevelMenu.visible:
+			
+			if is_instance_valid(focused_card) && focused_card.highlighted:
+				focused_card.highlighted = false
+			var offset = Vector2($HUD/SelectLevelMenu/LevelEntryContainer/LevelEntryGrid.position.x, $HUD/SelectLevelMenu/LevelEntryContainer.position.y)
+			focused_card = $HUD/SelectLevelMenu.get_card_at_position(event.position - offset)
+			if focused_card:
+				focused_card.highlighted = true
+
+
+
+
+
+"
+
 [node name="Main" type="Node"]
-script = ExtResource("1_q7tdo")
-tile_scene = ExtResource("2_ikhjo")
+script = SubResource("GDScript_tq2ro")
 
 [node name="Background" type="ColorRect" parent="."]
 anchors_preset = 15
