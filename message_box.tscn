@@ -1,8 +1,26 @@
-[gd_scene load_steps=4 format=3 uid="uid://d24tcxr5sq2sd"]
+[gd_scene load_steps=5 format=3 uid="uid://d24tcxr5sq2sd"]
 
-[ext_resource type="Theme" uid="uid://c8mfdhfoyqtvq" path="res://container_theme.tres" id="1_hoga8"]
+[ext_resource type="Theme" uid="uid://c8mfdhfoyqtvq" path="res://themes/container_theme.tres" id="1_hoga8"]
 [ext_resource type="FontFile" uid="uid://c2m2ct5i2ewj4" path="res://assets/Pixellari.ttf" id="3_aokeu"]
 [ext_resource type="Theme" uid="uid://cx1rlr5xncb2h" path="res://themes/button_theme.tres" id="4_l0mfd"]
+
+[sub_resource type="GDScript" id="GDScript_2ckjk"]
+script/source = "extends PanelContainer
+signal confirmed
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+
+func _on_ok_button_pressed():
+	confirmed.emit()
+"
 
 [node name="MessageBox" type="PanelContainer"]
 visible = false
@@ -19,6 +37,7 @@ offset_bottom = 64.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_hoga8")
+script = SubResource("GDScript_2ckjk")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -34,7 +53,7 @@ theme_override_font_sizes/font_size = 16
 text = "You win!"
 horizontal_alignment = 1
 
-[node name="BackToMenuButton" type="Button" parent="VBoxContainer"]
+[node name="OkButton" type="Button" parent="VBoxContainer"]
 texture_filter = 1
 custom_minimum_size = Vector2(145, 34)
 layout_mode = 2
@@ -43,3 +62,5 @@ size_flags_vertical = 6
 size_flags_stretch_ratio = 1.14
 theme = ExtResource("4_l0mfd")
 text = "Back to menu"
+
+[connection signal="pressed" from="VBoxContainer/OkButton" to="." method="_on_ok_button_pressed"]

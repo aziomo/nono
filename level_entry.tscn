@@ -2,19 +2,24 @@
 
 [ext_resource type="Shader" path="res://hl.gdshader" id="1_oxrg4"]
 [ext_resource type="Texture2D" uid="uid://ddxi0ly0xt30t" path="res://assets/q-mark.png" id="1_um03g"]
-[ext_resource type="Theme" uid="uid://c8mfdhfoyqtvq" path="res://container_theme.tres" id="2_3ghb6"]
+[ext_resource type="Theme" uid="uid://c8mfdhfoyqtvq" path="res://themes/container_theme.tres" id="2_3ghb6"]
 [ext_resource type="Theme" uid="uid://chcdb3lcs1co4" path="res://themes/label_theme.tres" id="2_xebli"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xh6pq"]
 resource_local_to_scene = true
 shader = ExtResource("1_oxrg4")
 shader_parameter/brightness = 4.75e-08
+shader_parameter/c = null
+shader_parameter/y = null
+shader_parameter/m = null
 
 [sub_resource type="GDScript" id="GDScript_34fr5"]
 script/source = "extends PanelContainer
 
-		
+var puzzle_name
+
 func set_label(puzzle):
+	puzzle_name = puzzle._name
 	$MarginContainer/HBoxContainer/VBoxContainer/PuzzleName.text = puzzle._name
 	$MarginContainer/HBoxContainer/VBoxContainer/PuzzleSize.text = \"%dx%d\" % [puzzle.get_board_height(), puzzle.get_board_width()]
 
@@ -34,8 +39,8 @@ func _process(delta):
 [node name="LevelEntry" type="PanelContainer"]
 texture_filter = 1
 material = SubResource("ShaderMaterial_xh6pq")
-offset_right = 776.0
-offset_bottom = 94.0
+offset_right = 270.0
+offset_bottom = 88.0
 theme = ExtResource("2_3ghb6")
 script = SubResource("GDScript_34fr5")
 
@@ -55,7 +60,6 @@ layout_mode = 2
 texture_filter = 1
 use_parent_material = true
 layout_mode = 2
-size_flags_horizontal = 2
 texture = ExtResource("1_um03g")
 expand_mode = 2
 stretch_mode = 6
@@ -69,7 +73,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 theme = ExtResource("2_xebli")
 theme_override_font_sizes/font_size = 32
-text = "puzzle name"
+text = "name"
 
 [node name="PuzzleSize" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2

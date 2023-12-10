@@ -1,0 +1,68 @@
+[gd_scene load_steps=5 format=3 uid="uid://dey711hm370gk"]
+
+[ext_resource type="Shader" path="res://hl.gdshader" id="1_onmhc"]
+[ext_resource type="Texture2D" uid="uid://ga4ledmesnom" path="res://assets/0.png" id="2_ka1o0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kfgye"]
+resource_local_to_scene = true
+shader = ExtResource("1_onmhc")
+shader_parameter/brightness = 4.75e-08
+shader_parameter/c = 4.75e-08
+shader_parameter/y = 4.75e-08
+shader_parameter/m = 4.75e-08
+
+[sub_resource type="GDScript" id="GDScript_5t7ul"]
+script/source = "extends Node2D
+
+
+var highlighted:
+	set(value):
+		highlighted = value
+		material.set_shader_parameter(\"brightness\", 0.2 if highlighted else 0.0)
+		
+var crossed_out:
+	set(value):
+		crossed_out = value
+		material.set_shader_parameter(\"c\", 0.5 if crossed_out else 0.0)
+		material.set_shader_parameter(\"y\", 0.5 if crossed_out else 0.0)
+
+@export var value: int:
+	set(x):
+		value = x
+		if value < 10:
+			$MainSprite.set_texture(Textures.dict[\"T%d\" % [value]])
+			$SecondarySprite.set_texture(null)
+		else:
+			var first = value / 10
+			var second = value % 10
+			$MainSprite.set_texture(Textures.dict[\"T%d_\" % [first]])
+			$SecondarySprite.set_texture(Textures.dict[\"T_%d\" % [second]])
+
+func _ready():
+	if value == null:
+		value = 0
+
+func _process(delta):
+	pass
+
+func height():
+	return $MainSprite.get_texture().get_height()
+	
+func width():
+	return $MainSprite.get_texture().get_height()
+
+"
+
+[node name="TileBoardNumber" type="Node2D"]
+texture_filter = 1
+material = SubResource("ShaderMaterial_kfgye")
+script = SubResource("GDScript_5t7ul")
+
+[node name="MainSprite" type="Sprite2D" parent="."]
+use_parent_material = true
+texture = ExtResource("2_ka1o0")
+centered = false
+
+[node name="SecondarySprite" type="Sprite2D" parent="."]
+use_parent_material = true
+centered = false

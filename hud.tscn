@@ -4,7 +4,7 @@
 [ext_resource type="FontFile" uid="uid://c2m2ct5i2ewj4" path="res://assets/Pixellari.ttf" id="2_6eyyu"]
 [ext_resource type="PackedScene" uid="uid://d24tcxr5sq2sd" path="res://message_box.tscn" id="3_kfql6"]
 [ext_resource type="Theme" uid="uid://cx1rlr5xncb2h" path="res://themes/button_theme.tres" id="5_14f0y"]
-[ext_resource type="PackedScene" uid="uid://c31xe6evynabn" path="res://SelectLevelMenu/select_level_menu.tscn" id="8_wjwhs"]
+[ext_resource type="PackedScene" uid="uid://c31xe6evynabn" path="res://select_level_menu.tscn" id="8_wjwhs"]
 
 [sub_resource type="GDScript" id="GDScript_n2v5r"]
 script/source = "extends CanvasLayer
@@ -23,61 +23,53 @@ func _on_start_button_pressed():
 func _on_quit_button_pressed():
 	get_tree().quit()
 
-func _on_back_to_menu_button_pressed():
+func _on_message_box_confirmed():
 	back_to_menu.emit()
 "
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bwk5l"]
 texture = ExtResource("1_f4ca4")
+texture_margin_left = 20.0
+texture_margin_right = 20.0
 
 [node name="HUD" type="CanvasLayer"]
 script = SubResource("GDScript_n2v5r")
 
-[node name="MessageBox" parent="." instance=ExtResource("3_kfql6")]
-
-[node name="MainMenu" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 15
+[node name="MainMenu" type="VBoxContainer" parent="."]
+anchors_preset = -1
+anchor_top = 0.1
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.9
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Label" type="Label" parent="MainMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_6eyyu")
+theme_override_font_sizes/font_size = 64
+text = "nonogram"
+horizontal_alignment = 1
 
 [node name="StartButton" type="Button" parent="MainMenu"]
 texture_filter = 1
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -91.0
-offset_top = -39.0
-offset_right = 91.0
-offset_bottom = 52.0
-grow_horizontal = 2
-grow_vertical = 2
+custom_minimum_size = Vector2(128, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
 theme = ExtResource("5_14f0y")
 theme_override_fonts/font = ExtResource("2_6eyyu")
 theme_override_font_sizes/font_size = 32
 theme_override_styles/normal = SubResource("StyleBoxTexture_bwk5l")
-text = "start game
+text = "start
 "
 
 [node name="QuitButton" type="Button" parent="MainMenu"]
 texture_filter = 1
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -91.0
-offset_top = -200.0
-offset_right = 91.0
-offset_bottom = -109.0
-grow_horizontal = 2
-grow_vertical = 0
+custom_minimum_size = Vector2(128, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
 theme = ExtResource("5_14f0y")
 theme_override_fonts/font = ExtResource("2_6eyyu")
 theme_override_font_sizes/font_size = 32
@@ -85,24 +77,13 @@ theme_override_styles/normal = SubResource("StyleBoxTexture_bwk5l")
 text = "quit
 "
 
-[node name="Label" type="Label" parent="MainMenu"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.166667
-anchor_right = 0.5
-anchor_bottom = 0.166667
-offset_left = -138.0
-offset_right = 138.0
-offset_bottom = 67.0
-grow_horizontal = 2
-theme_override_fonts/font = ExtResource("2_6eyyu")
-theme_override_font_sizes/font_size = 64
-text = "nonogram"
-horizontal_alignment = 1
-metadata/_edit_use_anchors_ = true
-
 [node name="SelectLevelMenu" parent="." instance=ExtResource("8_wjwhs")]
+visible = false
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MessageBox" parent="." instance=ExtResource("3_kfql6")]
 
 [connection signal="pressed" from="MainMenu/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="MainMenu/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="confirmed" from="MessageBox" to="." method="_on_message_box_confirmed"]

@@ -1,43 +1,76 @@
-[gd_scene load_steps=4 format=3 uid="uid://dl5kuer716c4x"]
-
-[ext_resource type="PackedScene" uid="uid://dntpalrnw5idk" path="res://tile.tscn" id="2_bv5p7"]
-[ext_resource type="PackedScene" uid="uid://dey711hm370gk" path="res://TileBoardNumber/tile_board_number.tscn" id="3_f1dcp"]
+[gd_scene load_steps=2 format=3 uid="uid://dl5kuer716c4x"]
 
 [sub_resource type="GDScript" id="GDScript_ruhoe"]
 script/source = "extends Node2D
 
 signal game_result
 
-@export var tile_scene: PackedScene
-@export var tile_label_scene: PackedScene
-var ex_tile
+var tile_scene = preload(\"res://tile.tscn\")
+var tile_label_scene = preload(\"res://tile_board_number.tscn\")
+
+var tile_size
 var focused_tile
+var focused_tile_label
 var prev_tile_state
 var tile_drag_edit_mode
+var pan = false
+var puzzle_array
 
-@export var puzzle_array = [
-	[0, 0, 0, 1, 1, 1, 1],
-	[0, 0, 0, 0, 0, 0, 1],
-	[0, 0, 1, 1, 1, 1, 1],
-	[0, 1, 0, 0, 0, 0, 1],
-	[1, 1, 1, 1, 1, 1, 1]
-]
+var grid_guidelines := []
 
 var points_to_win = 0
 var points: int = 0
 	
 func _enter_tree():
-	ex_tile = tile_scene.instantiate()
+	var tile = tile_scene.instantiate()
+	tile_size = Vector2(tile.width(), tile.height())
+	tile.free()
 	
 func _ready():
 	pass
+	
+func _process(delta):
+	pass
+		
+func _draw():
+	if puzzle_array:
+		for v_pair in grid_guidelines:
+			draw_line(v_pair[0], v_pair[1], Color.MAGENTA, 0.5 * scale.x)
+	
+func init_puzzle(puzzle):
+	puzzle_array = puzzle._board
+	var window_scaling = DisplayServer.window_get_size().x / ProjectSettings.get_setting(\"display/window/size/viewport_width\")
+	var window_size = DisplayServer.window_get_size() / window_scaling
+	var pos_x = window_size.x / 2 - (puzzle_array[0].size() * tile_size.x * scale.x / 2) 
+	var pos_y = window_size.y / 2 - (puzzle_array.size() * tile_size.y * scale.y / 2) 
+	
+	initialize_tiles()
+	self.position = Vector2(pos_x, pos_y)
+	
+	setup_grid_guidelines()
+
+
+func setup_grid_guidelines():
+	var board_height = puzzle_array.size() * tile_size.y
+	var board_width = puzzle_array[0].size() * tile_size.x
+	var h_offset = (tile_size.x / 32)
+	var v_offset = (tile_size.y / 32)
+	
+	var i = (tile_size.x * 5)
+	while i < board_width:
+		grid_guidelines.push_back([Vector2(i-h_offset, 0), Vector2(i-h_offset, board_height)])
+		i += (tile_size.x * 5)
+	
+	i = (tile_size.y * 5)
+	while i < board_height:
+		grid_guidelines.push_back([Vector2(0, i-v_offset), Vector2(board_width, i-v_offset)])
+		i += (tile_size.y * 5)
+	
 	
 func initialize_tiles():
 	points = 0
 	var pos_x = 0
 	var pos_y = 0
-	var tile
-	
 	
 	var row_labels = []
 	for row in puzzle_array:
@@ -47,12 +80,12 @@ func initialize_tiles():
 		for row_item in row:
 			if (keep_counting && row_item == 0):
 				keep_counting = false
-				single_row_labels.push_back(counter)
+				single_row_labels.push_front(counter)
 				counter = 0
 			elif (row_item == 1):
 				keep_counting = true
 				counter += 1
-		if counter > 0: single_row_labels.push_back(counter)
+		if counter > 0: single_row_labels.push_front(counter)
 		row_labels.push_back(single_row_labels)
 		
 	var col_labels = []
@@ -63,12 +96,12 @@ func initialize_tiles():
 		for row_idx in puzzle_array.size():
 			if (keep_counting && puzzle_array[row_idx][col_idx] == 0):
 				keep_counting = false
-				single_col_labels.push_back(counter)
+				single_col_labels.push_front(counter)
 				counter = 0
 			elif (puzzle_array[row_idx][col_idx] == 1):
 				keep_counting = true
 				counter += 1
-		if counter > 0: single_col_labels.push_back(counter)
+		if counter > 0: single_col_labels.push_front(counter)
 		col_labels.push_back(single_col_labels)
 	
 	
@@ -106,78 +139,121 @@ func initialize_tiles():
 	points_to_win = 0
 	for x in puzzle_array:
 		for y in x:
-			tile = tile_scene.instantiate()
+			var tile = tile_scene.instantiate()
 			tile.correct = bool(y)
 			points_to_win += y
 			tile.position = Vector2(pos_x, pos_y)
 			tile.connect('mark_changed', register_points)
 			add_child(tile)
 			tile.add_to_group(\"tiles\")
-			pos_x += tile.width()
+			pos_x += tile_size.x
 			
-		pos_y += tile.height()
+		pos_y += tile_size.y
 		pos_x = 0
 	
 func register_points(point):
 	points += point
 	if (points == points_to_win): game_result.emit(1)
 
-func _process(delta):
-	pass
+
 	
-func get_tile_at_position(position):
+func get_tile_at_position(m_position):
 	if !visible: return null
-	var col = int(position.x / ex_tile.width())
-	var row = int(position.y / ex_tile.height())
-	if position.x < 0 or position.y < 0 or col > puzzle_array[0].size() or row > puzzle_array.size():
-		return null
+	m_position /= scale
+	var col = int(m_position.x / tile_size.x)
+	var row = int(m_position.y / tile_size.y)
 	var tiles = get_tree().get_nodes_in_group(\"tiles\")
 	for tile in tiles:
 		if col * tile.width() == tile.position.x && row * tile.height() == tile.position.y:
 			return tile
+	return null
+	
+	
+			
+func get_tile_label_at_position(m_position):
+	if !visible: return null
+	m_position /= scale
+		
+	var labels = get_tree().get_nodes_in_group(\"tile_labels\")
+	for label in labels:
+		var label_pos = label.position
+		
+		if m_position.x > label_pos.x && m_position.x < label_pos.x + label.width() && \\
+			m_position.y > label_pos.y && m_position.y < label_pos.y + label.height():
+			return label
+	return null
+	
+	
+	
+
 	
 func _input(event):
 	if event is InputEventMouseButton:
 		
+		if event.pressed:
 			
-		if event.pressed and focused_tile:
 			if event.button_index == MOUSE_BUTTON_LEFT:
-				if focused_tile.state == Enums.TILE_STATE.FULL:
-					tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
-					focused_tile.state = Enums.TILE_STATE.CLEAR
-				else:
-					tile_drag_edit_mode = Enums.TILE_STATE.FULL
-					focused_tile.state = Enums.TILE_STATE.FULL
+				if focused_tile:
+					if focused_tile.state == Enums.TILE_STATE.FULL:
+						tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
+						focused_tile.state = Enums.TILE_STATE.CLEAR
+					else:
+						tile_drag_edit_mode = Enums.TILE_STATE.FULL
+						focused_tile.state = Enums.TILE_STATE.FULL
+				if focused_tile_label:
+					focused_tile_label.crossed_out = !focused_tile_label.crossed_out
 					
 			if event.button_index == MOUSE_BUTTON_RIGHT:
-				if focused_tile.state == Enums.TILE_STATE.CROSSED:
-					tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
-					focused_tile.state = Enums.TILE_STATE.CLEAR
-				else:
-					tile_drag_edit_mode = Enums.TILE_STATE.CROSSED
-					focused_tile.state = Enums.TILE_STATE.CROSSED
+				if focused_tile:
+					if focused_tile.state == Enums.TILE_STATE.CROSSED:
+						tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
+						focused_tile.state = Enums.TILE_STATE.CLEAR
+					else:
+						tile_drag_edit_mode = Enums.TILE_STATE.CROSSED
+						focused_tile.state = Enums.TILE_STATE.CROSSED
+						
+			if event.button_index == MOUSE_BUTTON_MIDDLE:
+				pan = true
+				
+			if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				scale -= Vector2(0.1, 0.1)
+				
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				scale += Vector2(0.1, 0.1)
 					
 		else:
 			tile_drag_edit_mode = null
+			pan = false
 		
 		
 	if event is InputEventMouseMotion:
 		
-		if visible:
-		
-			if is_instance_valid(focused_tile) && focused_tile.highlighted:
-				focused_tile.highlighted = false
+		if pan:
+			self.position += event.relative
 			
+		if is_instance_valid(focused_tile) && focused_tile.highlighted:
+			focused_tile.highlighted = false
+		if is_instance_valid(focused_tile_label) && focused_tile_label.highlighted:
+			focused_tile_label.highlighted = false		
+			
+		focused_tile = null
+		focused_tile_label = null
+		
+		var relative_pos = event.position - self.position
+		
+		if relative_pos.angle() > 0 && relative_pos.angle() < PI / 2:
 			focused_tile = get_tile_at_position(event.position - self.position)
 			if focused_tile:
 				focused_tile.highlighted = true
-
 				if tile_drag_edit_mode:
 					focused_tile.state = tile_drag_edit_mode
-	
+		else:
+			focused_tile_label = get_tile_label_at_position(event.position - self.position)
+			if focused_tile_label:
+				focused_tile_label.highlighted = true
 "
 
 [node name="TileBoard" type="Node2D"]
+z_index = 1
+scale = Vector2(2, 2)
 script = SubResource("GDScript_ruhoe")
-tile_scene = ExtResource("2_bv5p7")
-tile_label_scene = ExtResource("3_f1dcp")

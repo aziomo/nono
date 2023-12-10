@@ -6,7 +6,10 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_imdxd"]
 resource_local_to_scene = true
 shader = ExtResource("1_txcgd")
-shader_parameter/brightness = null
+shader_parameter/brightness = 4.75e-08
+shader_parameter/c = 4.75e-08
+shader_parameter/y = 4.75e-08
+shader_parameter/m = 4.75e-08
 
 [sub_resource type="GDScript" id="GDScript_1hfvl"]
 script/source = "extends Sprite2D
@@ -58,17 +61,17 @@ func update_texture(state):
 			set_texture(T_FULL)
 	
 func height():
-	return get_texture().get_height() * scale.y
+	return get_texture().get_height()
 	
 func width():
-	return get_texture().get_width() * scale.x
+	return get_texture().get_width()
 
 "
 
 [node name="Tile" type="Sprite2D"]
+z_as_relative = false
 texture_filter = 1
 material = SubResource("ShaderMaterial_imdxd")
-scale = Vector2(2, 2)
 texture = ExtResource("2_u1ni1")
 centered = false
 script = SubResource("GDScript_1hfvl")

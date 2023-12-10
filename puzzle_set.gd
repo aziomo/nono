@@ -1,7 +1,6 @@
 extends Node
 
-var puzzles := []
-
+var puzzles := {}
 
 func import_puzzles_from_file():
 	var file = FileAccess.open("puzzles.txt", FileAccess.READ)
@@ -16,6 +15,7 @@ func import_puzzles_from_file():
 		if line.contains('board='):
 			line = file.get_line()
 			while !line.contains('end'):
-				puzzle._board.push_back(line.split())
+				var x = Array(line.split()).map(func(digit): return int(digit)) 
+				puzzle._board.push_back(x)
 				line = file.get_line()
-			puzzles.push_back(puzzle)
+			puzzles[puzzle._name] = puzzle

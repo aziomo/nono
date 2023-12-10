@@ -1,17 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://c31xe6evynabn"]
+[gd_scene load_steps=4 format=3 uid="uid://c31xe6evynabn"]
 
-[ext_resource type="PackedScene" uid="uid://ch7ub38sw456r" path="res://level_entry.tscn" id="1_6kvku"]
 [ext_resource type="Theme" uid="uid://chcdb3lcs1co4" path="res://themes/label_theme.tres" id="1_k7nue"]
 [ext_resource type="Theme" uid="uid://cx1rlr5xncb2h" path="res://themes/button_theme.tres" id="2_llg4h"]
 
 [sub_resource type="GDScript" id="GDScript_lx1o3"]
 script/source = "extends VBoxContainer
 
-
-@export var level_entry_ps: PackedScene
-
+var level_entry_ps = preload(\"res://level_entry.tscn\")
 var current_page = 0
-
 
 func _ready():
 	pass
@@ -30,7 +26,7 @@ func set_entries():
 		var level_entry = level_entry_ps.instantiate()
 		level_entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		level_entry.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		level_entry.set_label(PuzzleSet.puzzles[puzzle_set_idx])
+		level_entry.set_label(PuzzleSet.puzzles.values()[puzzle_set_idx])
 		level_entry.add_to_group('cards')
 		$LevelEntryContainer/LevelEntryGrid.add_child(level_entry)
 		
@@ -44,7 +40,6 @@ func set_entries():
 			var pc = Control.new()
 			pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			pc.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			pc.custom_minimum_size = Vector2(336, 110)
 			$LevelEntryContainer/LevelEntryGrid.add_child(pc)
 			placeholders_to_add -= 1
 
@@ -76,14 +71,12 @@ func get_card_at_position(position):
 "
 
 [node name="SelectLevelMenu" type="VBoxContainer"]
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = SubResource("GDScript_lx1o3")
-level_entry_ps = ExtResource("1_6kvku")
 
 [node name="SelectLevelTitle" type="Label" parent="."]
 texture_filter = 1
