@@ -1,3 +1,10 @@
+name=point
+board=
+000
+010
+000
+end
+
 name=iron
 board=
 0001111

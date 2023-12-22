@@ -1,0 +1,268 @@
+[gd_scene load_steps=2 format=3 uid="uid://dl5kuer716c4x"]
+
+[sub_resource type="GDScript" id="GDScript_ruhoe"]
+script/source = "extends Node2D
+
+signal game_result
+signal change_scene_to(scene_enum)
+
+var tile_scene = preload(\"res://views/tileboard/tile.tscn\")
+var tile_label_scene = preload(\"res://views/tileboard/tile_board_number.tscn\")
+
+var tile_size
+var focused_tile
+var focused_tile_label
+var prev_tile_state
+var tile_drag_edit_mode
+var pan = false
+var puzzle_array
+
+var grid_guidelines := []
+
+var points_to_win = 0
+var points: int = 0
+	
+func _enter_tree():
+	var tile = tile_scene.instantiate()
+	tile_size = Vector2(tile.width(), tile.height())
+	tile.free()
+	
+func _ready():
+	init_puzzle(PuzzleSet.selected_puzzle)
+	
+func _process(delta):
+	pass
+		
+func _draw():
+	if puzzle_array:
+		for v_pair in grid_guidelines:
+			draw_line(v_pair[0], v_pair[1], Color.MAGENTA, 0.5 * scale.x)
+	
+func init_puzzle(puzzle):
+	puzzle_array = puzzle._board
+	center_board()
+	initialize_tiles()
+	setup_grid_guidelines()
+
+func center_board():
+	var window_scaling = DisplayServer.window_get_size().x / ProjectSettings.get_setting(\"display/window/size/viewport_width\")
+	var window_size = DisplayServer.window_get_size() / window_scaling
+	var pos_x = window_size.x / 2 - (puzzle_array[0].size() * tile_size.x * scale.x / 2) 
+	var pos_y = window_size.y / 2 - (puzzle_array.size() * tile_size.y * scale.y / 2) 
+	self.position = Vector2(pos_x, pos_y)
+
+func setup_grid_guidelines():
+	var board_height = puzzle_array.size() * tile_size.y
+	var board_width = puzzle_array[0].size() * tile_size.x
+	var h_offset = (tile_size.x / 32)
+	var v_offset = (tile_size.y / 32)
+	
+	var i = (tile_size.x * 5)
+	while i < board_width:
+		grid_guidelines.push_back([Vector2(i-h_offset, 0), Vector2(i-h_offset, board_height)])
+		i += (tile_size.x * 5)
+	
+	i = (tile_size.y * 5)
+	while i < board_height:
+		grid_guidelines.push_back([Vector2(0, i-v_offset), Vector2(board_width, i-v_offset)])
+		i += (tile_size.y * 5)
+	
+	
+func initialize_tiles():
+	var pos_x = 0
+	var pos_y = 0
+	
+	var row_labels = []
+	for row in puzzle_array:
+		var counter = 0
+		var keep_counting = false
+		var single_row_labels = []
+		for row_item in row:
+			if (keep_counting && row_item == 0):
+				keep_counting = false
+				single_row_labels.push_front(counter)
+				counter = 0
+			elif (row_item == 1):
+				keep_counting = true
+				counter += 1
+		if counter > 0: single_row_labels.push_front(counter)
+		if single_row_labels.size() == 0: single_row_labels.push_front(0)
+		row_labels.push_back(single_row_labels)
+		
+	var col_labels = []
+	for col_idx in puzzle_array[0].size():
+		var counter = 0
+		var keep_counting = false
+		var single_col_labels = []
+		for row_idx in puzzle_array.size():
+			if (keep_counting && puzzle_array[row_idx][col_idx] == 0):
+				keep_counting = false
+				single_col_labels.push_front(counter)
+				counter = 0
+			elif (puzzle_array[row_idx][col_idx] == 1):
+				keep_counting = true
+				counter += 1
+		if counter > 0: single_col_labels.push_front(counter)
+		if single_col_labels.size() == 0: single_col_labels.push_front(0)
+		col_labels.push_back(single_col_labels)
+	
+	
+	var label
+	for row_values in row_labels:
+		for label_value in row_values:
+			label = tile_label_scene.instantiate()
+			pos_x -= label.width()
+			label.position = Vector2(pos_x, pos_y)
+			label.value = label_value
+			add_child(label)
+			label.add_to_group(\"tile_labels\")
+		pos_x = 0
+		pos_y += label.height()
+		
+		
+	pos_x = 0
+	pos_y = 0
+		
+	for col_values in col_labels:
+		for label_value in col_values:
+			label = tile_label_scene.instantiate()
+			pos_y -= label.height()
+			label.position = Vector2(pos_x, pos_y)
+			label.value = label_value
+			add_child(label)
+			label.add_to_group(\"tile_labels\")
+		pos_x += label.width()
+		pos_y = 0
+	
+	
+	pos_x = 0
+	pos_y = 0
+	
+	points_to_win = 0
+	for x in puzzle_array:
+		for y in x:
+			var tile = tile_scene.instantiate()
+			tile.correct = bool(y)
+			points_to_win += y
+			tile.position = Vector2(pos_x, pos_y)
+			tile.connect('mark_changed', register_points)
+			add_child(tile)
+			tile.add_to_group(\"tiles\")
+			pos_x += tile_size.x
+			
+		pos_y += tile_size.y
+		pos_x = 0
+	
+func register_points(point):
+	points += point
+	if (points == points_to_win): 
+		var ps_msg_box: PackedScene = ResourceLoader.load(\"res://message_box.tscn\")
+		var msg_box = ps_msg_box.instantiate()
+		msg_box.connect('ok', func(): 
+			get_parent().remove_child(msg_box)
+			msg_box.queue_free()
+			change_scene_to.emit(Enums.SCENES.SELECT_LEVEL_MENU)
+		)
+		get_parent().add_child(msg_box)
+		
+	
+func get_tile_at_position(m_position):
+	if !visible: return null
+	m_position /= scale
+	var col = int(m_position.x / tile_size.x)
+	var row = int(m_position.y / tile_size.y)
+	var tiles = get_tree().get_nodes_in_group(\"tiles\")
+	for tile in tiles:
+		if col * tile.width() == tile.position.x && row * tile.height() == tile.position.y:
+			return tile
+	return null
+	
+	
+			
+func get_tile_label_at_position(m_position):
+	if !visible: return null
+	m_position /= scale
+		
+	var labels = get_tree().get_nodes_in_group(\"tile_labels\")
+	for label in labels:
+		var label_pos = label.position
+		
+		if m_position.x > label_pos.x && m_position.x < label_pos.x + label.width() && \\
+			m_position.y > label_pos.y && m_position.y < label_pos.y + label.height():
+			return label
+	return null
+	
+	
+	
+
+	
+func _input(event):
+	if event is InputEventMouseButton:
+		
+		if event.pressed:
+			
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				if focused_tile:
+					if focused_tile.state == Enums.TILE_STATE.FULL:
+						tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
+						focused_tile.state = Enums.TILE_STATE.CLEAR
+					else:
+						tile_drag_edit_mode = Enums.TILE_STATE.FULL
+						focused_tile.state = Enums.TILE_STATE.FULL
+				if focused_tile_label:
+					focused_tile_label.crossed_out = !focused_tile_label.crossed_out
+					
+			if event.button_index == MOUSE_BUTTON_RIGHT:
+				if focused_tile:
+					if focused_tile.state == Enums.TILE_STATE.CROSSED:
+						tile_drag_edit_mode = Enums.TILE_STATE.CLEAR
+						focused_tile.state = Enums.TILE_STATE.CLEAR
+					else:
+						tile_drag_edit_mode = Enums.TILE_STATE.CROSSED
+						focused_tile.state = Enums.TILE_STATE.CROSSED
+						
+			if event.button_index == MOUSE_BUTTON_MIDDLE:
+				pan = true
+				
+			if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				scale -= Vector2(0.1, 0.1)
+				
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				scale += Vector2(0.1, 0.1)
+					
+		if !event.pressed:
+			tile_drag_edit_mode = null
+			pan = false
+		
+		
+	if event is InputEventMouseMotion:
+		
+		if pan:
+			self.position += event.relative
+			
+		if is_instance_valid(focused_tile) && focused_tile.highlighted:
+			focused_tile.highlighted = false
+		if is_instance_valid(focused_tile_label) && focused_tile_label.highlighted:
+			focused_tile_label.highlighted = false		
+			
+		focused_tile = null
+		focused_tile_label = null
+		
+		var relative_pos = event.position - self.position
+		
+		if relative_pos.angle() > 0 && relative_pos.angle() < PI / 2:
+			focused_tile = get_tile_at_position(event.position - self.position)
+			if focused_tile:
+				focused_tile.highlighted = true
+				if tile_drag_edit_mode:
+					focused_tile.state = tile_drag_edit_mode
+		else:
+			focused_tile_label = get_tile_label_at_position(event.position - self.position)
+			if focused_tile_label:
+				focused_tile_label.highlighted = true
+"
+
+[node name="TileBoard" type="Node2D"]
+z_index = 1
+scale = Vector2(2, 2)
+script = SubResource("GDScript_ruhoe")

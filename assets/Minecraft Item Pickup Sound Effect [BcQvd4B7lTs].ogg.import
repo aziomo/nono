@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dmk6kqglb3iua"
+path="res://.godot/imported/Minecraft Item Pickup Sound Effect [BcQvd4B7lTs].ogg-6c58a91607e54af767d752aa058f8b31.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/Minecraft Item Pickup Sound Effect [BcQvd4B7lTs].ogg"
+dest_files=["res://.godot/imported/Minecraft Item Pickup Sound Effect [BcQvd4B7lTs].ogg-6c58a91607e54af767d752aa058f8b31.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

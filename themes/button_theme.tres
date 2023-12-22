@@ -1,7 +1,9 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://cx1rlr5xncb2h"]
+[gd_resource type="Theme" load_steps=13 format=3 uid="uid://cx1rlr5xncb2h"]
 
 [ext_resource type="Texture2D" uid="uid://dh8b6e3b8qt2f" path="res://assets/label-bg.png" id="1_3icsw"]
 [ext_resource type="FontFile" uid="uid://c2m2ct5i2ewj4" path="res://assets/Pixellari.ttf" id="1_8rl6j"]
+[ext_resource type="Texture2D" uid="uid://cm4tbc31wfi4p" path="res://assets/grabber.png" id="3_lgo5a"]
+[ext_resource type="Texture2D" uid="uid://djd7adls56n0a" path="res://assets/arrow.png" id="4_vku8c"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cx16b"]
 content_margin_left = 4.0
@@ -67,6 +69,24 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vscgr"]
+bg_color = Color(0.937255, 0.596078, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c8bx7"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_detail = 6
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rlegq"]
+texture = ExtResource("1_3icsw")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
 [resource]
 Button/colors/font_color = Color(0.875, 0.875, 0.875, 1)
 Button/colors/font_disabled_color = Color(0.875, 0.875, 0.875, 0.5)
@@ -91,3 +111,10 @@ Button/styles/focus = SubResource("StyleBoxFlat_fxgyd")
 Button/styles/hover = SubResource("StyleBoxFlat_bot3b")
 Button/styles/normal = SubResource("StyleBoxTexture_14br7")
 Button/styles/pressed = SubResource("StyleBoxFlat_22kql")
+HSlider/icons/grabber = ExtResource("3_lgo5a")
+HSlider/icons/grabber_highlight = ExtResource("3_lgo5a")
+HSlider/styles/grabber_area = SubResource("StyleBoxFlat_vscgr")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_vscgr")
+HSlider/styles/slider = SubResource("StyleBoxFlat_c8bx7")
+OptionButton/icons/arrow = ExtResource("4_vku8c")
+OptionButton/styles/normal = SubResource("StyleBoxTexture_rlegq")

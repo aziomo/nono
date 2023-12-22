@@ -1,0 +1,233 @@
+[gd_scene load_steps=8 format=3 uid="uid://b35w8gij71vns"]
+
+[ext_resource type="Theme" uid="uid://chcdb3lcs1co4" path="res://themes/label_theme.tres" id="1_g1yc6"]
+[ext_resource type="Theme" uid="uid://cx1rlr5xncb2h" path="res://themes/button_theme.tres" id="2_1kxnj"]
+[ext_resource type="PackedScene" uid="uid://bcatx43ay30d6" path="res://views/settings/setting_checkbox.tscn" id="3_vxwqv"]
+[ext_resource type="Texture2D" uid="uid://cvwr1f2c56eg" path="res://assets/cross-tile-x.png" id="4_0t07p"]
+[ext_resource type="Texture2D" uid="uid://berl85w586mco" path="res://assets/cross-tile-dot.png" id="5_ulav6"]
+[ext_resource type="Texture2D" uid="uid://b34qkttt5htpf" path="res://assets/cross-tile-slash.png" id="6_xb4cg"]
+
+[sub_resource type="GDScript" id="GDScript_usmsp"]
+script/source = "extends VBoxContainer
+signal change_scene_to
+
+var mus_start_value
+
+func _on_button_back_pressed():
+	change_scene_to.emit(Enums.SCENES.MAIN_MENU)
+	
+
+func _on_h_slider_value_changed(value):
+	if value == $ScrollContainer/MarginContainer/VBoxContainer/SetMusicCtr/HBox/HSlider.min_value:
+		Config.volume_change.emit(-100)
+	else:
+		Config.volume_change.emit(value)
+	
+		
+"
+
+[node name="SettingsMenu" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_usmsp")
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("1_g1yc6")
+theme_override_font_sizes/font_size = 32
+text = "Settings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 6.0
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_right = 100
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="SetLangHBox" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SetLangHBox"]
+layout_mode = 2
+theme = ExtResource("1_g1yc6")
+text = "Language"
+horizontal_alignment = 2
+
+[node name="OptionButton" type="OptionButton" parent="ScrollContainer/MarginContainer/VBoxContainer/SetLangHBox"]
+layout_mode = 2
+size_flags_vertical = 4
+theme = ExtResource("2_1kxnj")
+alignment = 1
+item_count = 2
+selected = 0
+popup/item_0/text = "english"
+popup/item_0/id = 0
+popup/item_1/text = "polski"
+popup/item_1/id = 1
+
+[node name="SetSfxCtr" type="MarginContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_right = 100
+
+[node name="HBox" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer/SetSfxCtr"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SetSfxCtr/HBox"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+theme = ExtResource("1_g1yc6")
+text = "SFX
+"
+horizontal_alignment = 2
+
+[node name="HSlider" type="HSlider" parent="ScrollContainer/MarginContainer/VBoxContainer/SetSfxCtr/HBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("2_1kxnj")
+value = 50.0
+
+[node name="SetMusicCtr" type="MarginContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_right = 100
+
+[node name="HBox" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer/SetMusicCtr"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SetMusicCtr/HBox"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+theme = ExtResource("1_g1yc6")
+text = "Music
+"
+horizontal_alignment = 2
+
+[node name="HSlider" type="HSlider" parent="ScrollContainer/MarginContainer/VBoxContainer/SetMusicCtr/HBox"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("2_1kxnj")
+min_value = -30.0
+max_value = 10.0
+value = 10.0
+
+[node name="SettingCheckbox" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox" index="1"]
+theme_override_font_sizes/font_size = 16
+text = "A second left click puts a cross"
+
+[node name="SettingCheckbox2" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox2" index="1"]
+text = "Hide the timer"
+
+[node name="SettingCheckbox3" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox3" index="1"]
+text = "Highlight numbers corresponding to the square under the cursor"
+
+[node name="SettingCheckbox4" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox4" index="1"]
+text = "Highlight the square under the cursor"
+
+[node name="SettingCheckbox5" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox5" index="1"]
+text = "Fill in the solved lines/columns with crosses"
+
+[node name="SettingCheckbox6" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox6" index="1"]
+text = "Switch on crossing out numbers automatically"
+
+[node name="SettingCheckbox7" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_vxwqv")]
+layout_mode = 2
+
+[node name="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox7" index="1"]
+text = "Auto check the crossword"
+
+[node name="SetCrossStyleCtr" type="MarginContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBox" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer/SetCrossStyleCtr"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/SetCrossStyleCtr/HBox"]
+layout_mode = 2
+theme = ExtResource("1_g1yc6")
+text = "Cross style"
+
+[node name="ButtonX" type="TextureButton" parent="ScrollContainer/MarginContainer/VBoxContainer/SetCrossStyleCtr/HBox"]
+texture_filter = 1
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("4_0t07p")
+stretch_mode = 0
+
+[node name="ButtonDot" type="TextureButton" parent="ScrollContainer/MarginContainer/VBoxContainer/SetCrossStyleCtr/HBox"]
+texture_filter = 1
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("5_ulav6")
+stretch_mode = 0
+
+[node name="ButtonSlash" type="TextureButton" parent="ScrollContainer/MarginContainer/VBoxContainer/SetCrossStyleCtr/HBox"]
+texture_filter = 1
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("6_xb4cg")
+stretch_mode = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="ButtonBack" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_1kxnj")
+text = "Back
+"
+
+[connection signal="value_changed" from="ScrollContainer/MarginContainer/VBoxContainer/SetMusicCtr/HBox/HSlider" to="." method="_on_h_slider_value_changed"]
+[connection signal="pressed" from="HBoxContainer/ButtonBack" to="." method="_on_button_back_pressed"]
+
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox"]
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox2"]
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox3"]
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox4"]
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox5"]
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox6"]
+[editable path="ScrollContainer/MarginContainer/VBoxContainer/SettingCheckbox7"]

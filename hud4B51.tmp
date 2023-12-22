@@ -1,0 +1,54 @@
+[gd_scene load_steps=5 format=3 uid="uid://dhjpe1sqhps8e"]
+
+[ext_resource type="PackedScene" uid="uid://cg26lgggapq3g" path="res://main_menu.tscn" id="1_mavci"]
+[ext_resource type="PackedScene" uid="uid://d24tcxr5sq2sd" path="res://message_box.tscn" id="3_kfql6"]
+[ext_resource type="PackedScene" uid="uid://c31xe6evynabn" path="res://select_level_menu.tscn" id="8_wjwhs"]
+
+[sub_resource type="GDScript" id="GDScript_n2v5r"]
+script/source = "extends CanvasLayer
+signal start_game
+signal back_to_menu
+
+var settings_scene = preload(\"res://settings_menu.tscn\")
+var level_select_scene = preload(\"res://select_level_menu.tscn\")
+
+func _ready():
+	pass
+	
+func _process(delta):
+	pass
+
+func _on_start_button_pressed():
+	start_game.emit()
+
+func _on_quit_button_pressed():
+	get_tree().quit()
+
+func _on_message_box_confirmed():
+	back_to_menu.emit()
+
+func show_settings():
+	var settings = settings_scene.instantiate()
+	add_child(settings)
+	
+func show_level_select():
+	var level_select = level_select_scene.instantiate()
+	add_child(level_select)
+	
+func show_main_menu():
+	pass
+"
+
+[node name="HUD" type="CanvasLayer"]
+script = SubResource("GDScript_n2v5r")
+
+[node name="MainMenu" parent="." instance=ExtResource("1_mavci")]
+
+[node name="SelectLevelMenu" parent="." instance=ExtResource("8_wjwhs")]
+visible = false
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MessageBox" parent="." instance=ExtResource("3_kfql6")]
+
+[connection signal="confirmed" from="MessageBox" to="." method="_on_message_box_confirmed"]

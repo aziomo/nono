@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 Enums="*res://enums.gd"
 PuzzleSet="*res://puzzle_set.gd"
 Textures="*res://textures.gd"
+Config="*res://config.gd"
 
 [display]
 

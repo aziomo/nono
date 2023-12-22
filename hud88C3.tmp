@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3 uid="uid://dhjpe1sqhps8e"]
+
+[sub_resource type="GDScript" id="GDScript_n2v5r"]
+script/source = "extends CanvasLayer
+
+signal back_to_menu
+
+var ps_main_menu = preload(\"res://views/main_menu.tscn\")
+var ps_settings_menu = preload(\"res://views/settings/settings_menu.tscn\")
+var ps_select_level_menu = preload(\"res://views/level_select/select_level_menu.tscn\")
+var ps_tileboard = preload(\"res://views/tileboard/tile_board.tscn\")
+
+var current_scene
+
+func _ready():
+	pass
+	
+func _process(delta):
+	pass
+
+func _on_message_box_confirmed():
+	back_to_menu.emit()
+	
+	
+func change_scene_to(scene_name: Enums.SCENES):
+	remove_current_scene()
+	var packed_scene = scene_name_to_packed_scene(scene_name)
+	var scene = packed_scene.instantiate()
+	scene.connect('change_scene_to', change_scene_to)
+	add_child(scene)
+	current_scene = scene
+	
+func scene_name_to_packed_scene(name: Enums.SCENES):
+	match name:
+		Enums.SCENES.MAIN_MENU:
+			return ps_main_menu
+		Enums.SCENES.SELECT_LEVEL_MENU:
+			return ps_select_level_menu
+		Enums.SCENES.SETTINGS_MENU:
+			return ps_settings_menu
+		Enums.SCENES.TILEBOARD:
+			return ps_tileboard
+	
+func remove_current_scene():
+	if current_scene:
+		remove_child(current_scene)
+		current_scene.queue_free()
+	
+"
+
+[node name="HUD" type="CanvasLayer"]
+script = SubResource("GDScript_n2v5r")

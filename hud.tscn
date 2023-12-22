@@ -1,89 +1,40 @@
-[gd_scene load_steps=8 format=3 uid="uid://dhjpe1sqhps8e"]
-
-[ext_resource type="Texture2D" uid="uid://dh8b6e3b8qt2f" path="res://assets/label-bg.png" id="1_f4ca4"]
-[ext_resource type="FontFile" uid="uid://c2m2ct5i2ewj4" path="res://assets/Pixellari.ttf" id="2_6eyyu"]
-[ext_resource type="PackedScene" uid="uid://d24tcxr5sq2sd" path="res://message_box.tscn" id="3_kfql6"]
-[ext_resource type="Theme" uid="uid://cx1rlr5xncb2h" path="res://themes/button_theme.tres" id="5_14f0y"]
-[ext_resource type="PackedScene" uid="uid://c31xe6evynabn" path="res://select_level_menu.tscn" id="8_wjwhs"]
+[gd_scene load_steps=2 format=3 uid="uid://dhjpe1sqhps8e"]
 
 [sub_resource type="GDScript" id="GDScript_n2v5r"]
 script/source = "extends CanvasLayer
-signal start_game
-signal back_to_menu
 
-func _ready():
-	pass
+var ps_main_menu = preload(\"res://views/main_menu.tscn\")
+var ps_settings_menu = preload(\"res://views/settings/settings_menu.tscn\")
+var ps_select_level_menu = preload(\"res://views/level_select/select_level_menu.tscn\")
+var ps_tileboard = preload(\"res://views/tileboard/tile_board.tscn\")
+
+var current_scene
 	
-func _process(delta):
-	pass
-
-func _on_start_button_pressed():
-	start_game.emit()
-
-func _on_quit_button_pressed():
-	get_tree().quit()
-
-func _on_message_box_confirmed():
-	back_to_menu.emit()
+func change_scene_to(scene_name: Enums.SCENES):
+	remove_current_scene()
+	var packed_scene = scene_name_to_packed_scene(scene_name)
+	var scene = packed_scene.instantiate()
+	scene.connect('change_scene_to', change_scene_to)
+	add_child(scene)
+	current_scene = scene
+	
+func scene_name_to_packed_scene(scene_name: Enums.SCENES):
+	match scene_name:
+		Enums.SCENES.MAIN_MENU:
+			return ps_main_menu
+		Enums.SCENES.SELECT_LEVEL_MENU:
+			return ps_select_level_menu
+		Enums.SCENES.SETTINGS_MENU:
+			return ps_settings_menu
+		Enums.SCENES.TILEBOARD:
+			return ps_tileboard
+	
+func remove_current_scene():
+	if current_scene:
+		remove_child(current_scene)
+		current_scene.queue_free()
+	
 "
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bwk5l"]
-texture = ExtResource("1_f4ca4")
-texture_margin_left = 20.0
-texture_margin_right = 20.0
 
 [node name="HUD" type="CanvasLayer"]
 script = SubResource("GDScript_n2v5r")
-
-[node name="MainMenu" type="VBoxContainer" parent="."]
-anchors_preset = -1
-anchor_top = 0.1
-anchor_right = 1.0
-anchor_bottom = 0.9
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Label" type="Label" parent="MainMenu"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_fonts/font = ExtResource("2_6eyyu")
-theme_override_font_sizes/font_size = 64
-text = "nonogram"
-horizontal_alignment = 1
-
-[node name="StartButton" type="Button" parent="MainMenu"]
-texture_filter = 1
-custom_minimum_size = Vector2(128, 64)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 6
-theme = ExtResource("5_14f0y")
-theme_override_fonts/font = ExtResource("2_6eyyu")
-theme_override_font_sizes/font_size = 32
-theme_override_styles/normal = SubResource("StyleBoxTexture_bwk5l")
-text = "start
-"
-
-[node name="QuitButton" type="Button" parent="MainMenu"]
-texture_filter = 1
-custom_minimum_size = Vector2(128, 64)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 6
-theme = ExtResource("5_14f0y")
-theme_override_fonts/font = ExtResource("2_6eyyu")
-theme_override_font_sizes/font_size = 32
-theme_override_styles/normal = SubResource("StyleBoxTexture_bwk5l")
-text = "quit
-"
-
-[node name="SelectLevelMenu" parent="." instance=ExtResource("8_wjwhs")]
-visible = false
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="MessageBox" parent="." instance=ExtResource("3_kfql6")]
-
-[connection signal="pressed" from="MainMenu/StartButton" to="." method="_on_start_button_pressed"]
-[connection signal="pressed" from="MainMenu/QuitButton" to="." method="_on_quit_button_pressed"]
-[connection signal="confirmed" from="MessageBox" to="." method="_on_message_box_confirmed"]

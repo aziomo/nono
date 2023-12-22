@@ -1,5 +1,6 @@
 extends Node
 
+var selected_puzzle
 var puzzles := {}
 
 func import_puzzles_from_file():

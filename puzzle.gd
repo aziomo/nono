@@ -1,7 +1,7 @@
 extends Object
 class_name Puzzle
 
-var _name:String = "unnamed"
+var _name := "unnamed"
 var _board := [] 
 
 func get_board_width() -> int :
